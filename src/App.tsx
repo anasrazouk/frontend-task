@@ -1,16 +1,22 @@
-import { useEffect, useState } from "react";
-import axios from "./utils/axios";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Navigate,
+} from "react-router-dom";
+import Products from "./components/Products";
+
 function App() {
-  const [products, setproducts] = useState([]);
-  useEffect(() => {
-    axios.get("products").then((res: any) => setproducts(res.data.products));
-  }, []);
   return (
-    <div>
-      {products.map((item: { id: number; title: string }) => (
-        <div key={item.id}>{`${item.id}: ${item.title}`}</div>
-      ))}
-    </div>
+    <Router>
+      <Routes>
+        {/* Redirect root path to '/products' */}
+        <Route path="/" element={<Products />} />
+        <Route path="/new-product" element={<p>add new product</p>} />
+        {/* Fallback Route */}
+        <Route path="*" element={<Navigate to="/" />} />
+      </Routes>
+    </Router>
   );
 }
 
