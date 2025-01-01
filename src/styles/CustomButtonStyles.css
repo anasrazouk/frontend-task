@@ -1,0 +1,33 @@
+.button {
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-weight: bold;
+  display: inline-flex;
+  align-items: center;
+}
+
+.button-primary {
+  background-color: #3b82f6;
+  color: white;
+}
+
+.button-secondary {
+  background-color: #6b7280;
+  color: black;
+}
+
+.button-small {
+  font-size: 0.875rem;
+}
+
+.button-regular {
+  font-size: 1rem;
+}
+
+.button-large {
+  font-size: 1.25rem;
+}
+
+.button-icon {
+  margin-right: 8px;
+}
