@@ -15,88 +15,23 @@ import AccountCircle from "@mui/icons-material/AccountCircle";
 import MailIcon from "@mui/icons-material/Mail";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import MoreIcon from "@mui/icons-material/MoreVert";
-import NavTabs from "./NavTabs";
+import "../styles/NavLink.css";
+
 import { Tab } from "@mui/material";
-// const Search = styled("div")(({ theme }) => ({
-//   position: "relative",
-//   borderRadius: theme.shape.borderRadius,
-//   backgroundColor: alpha(theme.palette.grey[400], 0.15),
-//   "&:hover": {
-//     backgroundColor: alpha(theme.palette.grey[400], 0.25),
-//   },
-//   marginRight: theme.spacing(2),
-//   marginLeft: 0,
-//   width: "100%",
-//   [theme.breakpoints.up("sm")]: {
-//     marginLeft: theme.spacing(3),
-//     width: "auto",
-//   },
-// }));
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import ShoppingCartOutlinedIcon from "@mui/icons-material/ShoppingCartOutlined";
+import AddProductPage from "./AddProductPage";
+import CartPage from "./CartPage";
+import CustomButton from "./CustomButton";
+import { useProductCart } from "../store/CartProduct";
 
-// const SearchIconWrapper = styled("div")(({ theme }) => ({
-//   padding: theme.spacing(0, 2),
-//   height: "100%",
-//   position: "absolute",
-//   pointerEvents: "none",
-//   display: "flex",
-//   alignItems: "center",
-//   justifyContent: "center",
-// }));
-function samePageLinkNavigation(
-  event: React.MouseEvent<HTMLAnchorElement, MouseEvent>,
-) {
-  if (
-    event.defaultPrevented ||
-    event.button !== 0 || // ignore everything but left-click
-    event.metaKey ||
-    event.ctrlKey ||
-    event.altKey ||
-    event.shiftKey
-  ) {
-    return false;
-  }
-  return true;
-}
-
-// const StyledInputBase = styled(InputBase)(({ theme }) => ({
-//   color: "inherit",
-//   "& .MuiInputBase-input": {
-//     padding: theme.spacing(1, 1, 1, 0),
-//     paddingLeft: `calc(1em + ${theme.spacing(4)})`,
-//     transition: theme.transitions.create("width"),
-//     width: "100%",
-//     [theme.breakpoints.up("md")]: {
-//       width: "20ch",
-//     },
-//   },
-// }));
-interface LinkTabProps {
-    label?: string;
-    href?: string;
-    selected?: boolean;
-  }
-  
-function LinkTab(props: LinkTabProps) {
-    return (
-      <Tab
-        component="a"
-        onClick={(event: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => {
-          // Routing libraries handle this, you can remove the onClick handle when using them.
-          if (samePageLinkNavigation(event)) {
-            event.preventDefault();
-          }
-        }}
-        aria-current={props.selected && 'page'}
-        {...props}
-      />
-    );
-  }
-  
 export default function PrimarySearchAppBar() {
   const [anchorEl, setAnchorEl] = React.useState<null | HTMLElement>(null);
   const [mobileMoreAnchorEl, setMobileMoreAnchorEl] =
     React.useState<null | HTMLElement>(null);
-
+     const products = useProductCart((state) => state.productsForCart);
+     const productsLength = products.length ; 
+  const navigat = useNavigate();
   const isMenuOpen = Boolean(anchorEl);
   const isMobileMenuOpen = Boolean(mobileMoreAnchorEl);
 
@@ -157,25 +92,21 @@ export default function PrimarySearchAppBar() {
       onClose={handleMobileMenuClose}
     >
       <MenuItem>
-        <IconButton size="large" aria-label="show 4 new mails" color="inherit">
-          <Badge badgeContent={4} color="error">
-            <MailIcon />
-          </Badge>
-        </IconButton>
-        <p>Messages</p>
-      </MenuItem>
-      <MenuItem>
         <IconButton
+          onClick={() => {
+            navigat("/cart");
+          }}
           size="large"
-          aria-label="show 17 new notifications"
+          aria-label="show 4 new mails"
           color="inherit"
         >
-          <Badge badgeContent={17} color="error">
-            <NotificationsIcon />
+          <Badge badgeContent={productsLength} color="error">
+            <ShoppingCartOutlinedIcon />
           </Badge>
         </IconButton>
-        <p>Notifications</p>
+        <p>Shopping Cart</p>
       </MenuItem>
+
       <MenuItem onClick={handleProfileMenuOpen}>
         <IconButton
           size="large"
@@ -203,40 +134,48 @@ export default function PrimarySearchAppBar() {
           backgroundColor: "white",
         }}
       >
-       
         <Toolbar>
-          {/* <Search>
-            <SearchIconWrapper>
-              <SearchIcon />
-            </SearchIconWrapper>
-            <StyledInputBase
-              placeholder="Search…"
-              inputProps={{ 'aria-label': 'search' }}
-            />
-          </Search> */}
-          <img src="vite.svg" width={"50px"} />
-          <LinkTab label="Product Listing Page" href="/drafts" />
-          <LinkTab label="Add Product Page" href="/trash" />
+          <img src="vite.svg" width={"50px"} style={{marginRight : 25}} />
+
+          <NavLink
+            to="/"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Product Listing
+          </NavLink>
+          <NavLink
+            to="/new-product"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            Add Product
+          </NavLink>
+          {/* <NavLink
+            to="/cart"
+            className={({ isActive }) =>
+              isActive ? "nav-link active" : "nav-link"
+            }
+          >
+            cart
+          </NavLink> */}
           <Box sx={{ flexGrow: 1 }} />
           <Box sx={{ display: { xs: "none", md: "flex" } }}>
             <IconButton
               size="large"
               aria-label="show 4 new mails"
               color="inherit"
+              onClick={() => {
+                navigat("/cart");
+              }}
             >
-              <Badge badgeContent={4} color="error">
-                <MailIcon />
+              <Badge badgeContent={productsLength} color="error">
+                <ShoppingCartOutlinedIcon />
               </Badge>
             </IconButton>
-            <IconButton
-              size="large"
-              aria-label="show 17 new notifications"
-              color="inherit"
-            >
-              <Badge badgeContent={17} color="error">
-                <NotificationsIcon />
-              </Badge>
-            </IconButton>
+
             <IconButton
               size="large"
               edge="end"
@@ -263,9 +202,7 @@ export default function PrimarySearchAppBar() {
           </Box>
         </Toolbar>
       </AppBar>
-      {/* <Box sx={{ position: "fixed", top: "64px", width: "100vw", zIndex: 10 }}>
-        <NavTabs />
-      </Box> */}
+
       {renderMobileMenu}
       {renderMenu}
     </>

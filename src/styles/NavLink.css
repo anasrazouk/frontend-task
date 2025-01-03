@@ -1,0 +1,15 @@
+
+.nav-link {
+    text-decoration: none;
+    color: rgb(130, 127, 127); 
+    margin-right: 20px; 
+    font-size: 20px;
+    font-weight: bold;
+  }
+  
+  
+  .nav-link.active {
+    color: rgb(15, 15, 15); 
+    border-bottom: 2px solid rgb(1, 1, 1); 
+  }
+  

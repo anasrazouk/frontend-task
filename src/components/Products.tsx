@@ -10,36 +10,42 @@ import MenuItem from "@mui/material/MenuItem";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { Loading } from "./Loading";
 import Grid from "@mui/material/Grid";
+import { debounce } from "@mui/material";
 
-const PRODUCTS_PER_PAGE = 9;
+const PRODUCTS_PER_PAGE = 21;
+type ProductType = {
+  id: number;
+  title: string;
+  images: string[];
+  description: string;
+  category: string;
+  price: number;
+  rating: number;
+  amount: number;
+};
+
+type ProductsType = ProductType[];
+type CategoryType = { name: string; slug: string }[];
 
 const Products = () => {
   const [loading, setLoading] = useState(true);
-  const [categories, setCategories] = useState<
-    { name: string; slug: string }[]
-  >([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("all");
-  const [products, setProducts] = useState<
-    {
-      title: string;
-      images: string[];
-      description: string;
-      category: string;
-      price: number;
-      rating: number;
-    }[]
-  >([]);
+  const [categories, setCategories] = useState<CategoryType>([]);
+  // const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [products, setProducts] = useState<ProductsType>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [searchParams, setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") || "1", 10);
-  const searchQuery = searchParams.get("q") || "";
+  const [searchQuery, setSearchQuery] = useState(searchParams.get("q") || "");
   const sortBy = searchParams.get("sortBy") || "title";
   const order = searchParams.get("order") || "asc";
+  const categoryQuery = searchParams.get("category") || "all";
+  const [selectedCategory, setSelectedCategory] =
+    useState<string>(categoryQuery);
 
   const fetchCategories = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await axios.get("https://dummyjson.com/products/categories");
+      const res = await axios.get("products/categories");
       setCategories(res.data);
     } catch (error) {
       console.error("Error fetching categories:", error);
@@ -54,15 +60,29 @@ const Products = () => {
     try {
       const skip = (currentPage - 1) * PRODUCTS_PER_PAGE;
       let url;
-      if (searchQuery) {
-        url = `https://dummyjson.com/products/search?q=${searchQuery}&limit=${PRODUCTS_PER_PAGE}&skip=${skip}`;
+      let categoryFilterAppliedWithSearchQuery = false;
+      if (searchQuery && selectedCategory !== "all") {
+        categoryFilterAppliedWithSearchQuery = true;
+        url = `products/category/${selectedCategory}?limit=${PRODUCTS_PER_PAGE}&skip=${skip}&sortBy=${sortBy}&order=${order}`;
+      } else if (searchQuery && selectedCategory === "all") {
+        url = `products/search?q=${searchQuery}&limit=${PRODUCTS_PER_PAGE}&skip=${skip}`;
       } else if (selectedCategory !== "all") {
-        url = `https://dummyjson.com/products/category/${selectedCategory}?limit=${PRODUCTS_PER_PAGE}&skip=${skip}&sortBy=${sortBy}&order=${order}`;
+        url = `products/category/${selectedCategory}?limit=${PRODUCTS_PER_PAGE}&skip=${skip}&sortBy=${sortBy}&order=${order}`;
       } else {
-        url = `https://dummyjson.com/products?limit=${PRODUCTS_PER_PAGE}&skip=${skip}&sortBy=${sortBy}&order=${order}`;
+        url = `products?limit=${PRODUCTS_PER_PAGE}&skip=${skip}&sortBy=${sortBy}&order=${order}`;
       }
       const res = await axios.get(url);
-      setProducts(res.data.products);
+      let productsData = res.data.products;
+      if (categoryFilterAppliedWithSearchQuery) {
+        productsData = res.data.products.filter(
+          (product: ProductType) =>
+            product.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            product.description
+              .toLowerCase()
+              .includes(searchQuery.toLowerCase())
+        );
+      }
+      setProducts(productsData);
       setTotalProducts(res.data.total);
     } catch (error) {
       console.error("Error fetching products:", error);
@@ -70,7 +90,7 @@ const Products = () => {
     } finally {
       setLoading(false);
     }
-  }, [currentPage, searchQuery, sortBy, order, selectedCategory]);
+  }, [currentPage, searchQuery, selectedCategory, sortBy, order]);
 
   useEffect(() => {
     fetchCategories();
@@ -91,13 +111,30 @@ const Products = () => {
     _event: React.ChangeEvent<unknown>,
     page: number
   ) => {
-    setSearchParams({ page: page.toString(), q: searchQuery, sortBy, order });
+    setSearchParams({
+      page: page.toString(),
+      q: searchQuery,
+      category: selectedCategory,
+      sortBy,
+      order,
+    });
   };
 
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const query = event.target.value;
-    setSearchParams({ page: "1", q: query, sortBy, order });
+    setSearchQuery(() => query);
+    handleSearchParamsChange(query);
   };
+
+  const handleSearchParamsChange = debounce((query) => {
+    setSearchParams({
+      page: "1",
+      q: query,
+      category: selectedCategory,
+      sortBy,
+      order,
+    });
+  }, 300);
 
   const handleSortChange = (
     event: SelectChangeEvent<`${string}-${string}`>
@@ -106,6 +143,7 @@ const Products = () => {
     setSearchParams({
       page: "1",
       q: searchQuery,
+      category: selectedCategory,
       sortBy: newSortBy,
       order: newOrder,
     });
@@ -114,7 +152,13 @@ const Products = () => {
   const handleCategoryChange = (event: SelectChangeEvent<string>) => {
     const category = event.target.value;
     setSelectedCategory(category);
-    setSearchParams({ page: "1", q: searchQuery, sortBy, order });
+    setSearchParams({
+      page: "1",
+      q: searchQuery,
+      category: category,
+      sortBy,
+      order,
+    });
   };
 
   const renderCategories = () =>
@@ -183,15 +227,17 @@ const Products = () => {
       ) : (
         <>
           <Grid container spacing={2}>
-            {products.map((product, index) => (
+            {products.map((product: ProductType, index) => (
               <Grid key={index} item xs={12} sm={6} md={4}>
                 <ProductCard
+                  id={product.id}
                   title={product.title}
-                  image={product.images[0]}
+                  images={product.images}
                   category={product.category}
                   description={product.description}
                   price={product.price}
                   rating={product.rating}
+                  amount={product.amount}
                 />
               </Grid>
             ))}

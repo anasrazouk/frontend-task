@@ -7,7 +7,9 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import ShareIcon from "@mui/icons-material/Share";
 import { Box, styled } from "@mui/system";
 import { Rating } from "@mui/material";
-
+import CustomButton from "./CustomButton";
+import AddCircleOutlineOutlinedIcon from "@mui/icons-material/AddCircleOutlineOutlined";
+import { useProductCart } from "../store/CartProduct";
 const StyledCard = styled(Card)(() => ({
   width: "100%",
   height: 500,
@@ -67,27 +69,36 @@ const Description = styled("div")({
 });
 
 type ProductCardProps = {
+  id: number;
   title: string;
-  image: string;
+  images: string[];
   description: string;
   category: string;
   price: number;
   rating: number;
+  amount: number;
 };
 
 export default function ProductCard({
+  id,
   title,
-  image,
+  images,
   description,
   category,
   price,
   rating,
+  amount,
 }: ProductCardProps) {
+  const addProductToCart = useProductCart((state) => state.addProductToCart);
+  const product = { id, title, price, images, amount };
   return (
     <StyledCard>
       <CardHeader title={title} subheader={category} />
       <ImageContainer>
-        <Image style={{ backgroundImage: `url(${image})` }} className="image" />
+        <Image
+          style={{ backgroundImage: `url(${images[0]})` }}
+          className="image"
+        />
         <Description className="description">
           <Typography variant="body1">{description}</Typography>
         </Description>
@@ -122,6 +133,15 @@ export default function ProductCard({
       >
         {`${price} $`}
       </Typography>
+      <CustomButton
+        type="submit"
+        onClick={() => addProductToCart(product)}
+        size="small"
+        icon={<AddCircleOutlineOutlinedIcon />}
+        color="primary"
+      >
+        Add to cart
+      </CustomButton>
     </StyledCard>
   );
 }

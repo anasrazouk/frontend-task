@@ -1,19 +1,21 @@
 .button {
   padding: 8px 16px;
-  border-radius: 4px;
+  border-radius: 10px;
   font-weight: bold;
   display: inline-flex;
   align-items: center;
+  border: none;
+  -webkit-margin-start: 16px;
 }
 
 .button-primary {
-  background-color: #3b82f6;
+  background-color: #6f7174;
   color: white;
 }
 
 .button-secondary {
-  background-color: #6b7280;
-  color: black;
+  background-color: #ebedf1;
+  color: rgb(95, 94, 94);
 }
 
 .button-small {

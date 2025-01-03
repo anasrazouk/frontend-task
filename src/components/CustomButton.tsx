@@ -4,20 +4,22 @@ import "../styles/CustomButtonStyles.css";
 type ButtonProps = {
   color: "primary" | "secondary";
   size: "regular" | "small" | "large";
+  type? : "submit" 
   icon?: React.ReactNode;
   children: React.ReactNode;
-  onClick: () => void;
+  onClick?: () => void;
 };
 const CustomButton = ({
   color,
   size,
   icon,
   children,
+  type,
   onClick,
 }: ButtonProps) => {
   const buttonClass = `button button-${color} button-${size}`;
   return (
-    <button className={buttonClass} onClick={onClick}>
+    <button type={type} className={buttonClass} onClick={onClick}>
       {icon && <span className="button-icon">{icon}</span>}
       {children}
     </button>
